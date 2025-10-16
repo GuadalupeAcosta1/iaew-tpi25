@@ -1,0 +1,59 @@
+{
+  "info": {
+    "name": "Alquiler de Veh\u00edculos \u2014 API",
+    "_postman_id": "00000000-0000-0000-0000-000000000000",
+    "description": "Colecci\u00f3n m\u00ednima para la Etapa 1",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/health",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "health"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Listar Veh\u00edculos",
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:3000/api/vehiculos"
+      }
+    },
+    {
+      "name": "Crear Reserva",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"vehiculoId\": \"00000000-0000-0000-0000-000000000001\", \"clienteId\": \"99999999-9999-9999-9999-999999999999\", \"desde\": \"2025-10-20T10:00:00Z\", \"hasta\": \"2025-10-20T18:00:00Z\"}"
+        },
+        "url": "http://localhost:3000/api/reservas"
+      }
+    },
+    {
+      "name": "Confirmar Reserva (async)",
+      "request": {
+        "method": "POST",
+        "url": "http://localhost:3000/api/reservas/11111111-1111-1111-1111-111111111111/confirmar"
+      }
+    }
+  ]
+}

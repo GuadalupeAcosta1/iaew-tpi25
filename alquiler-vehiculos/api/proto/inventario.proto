@@ -1,0 +1,28 @@
+syntax = "proto3";
+package inventario.v1;
+
+service InventarioService {
+  rpc CheckAndBlock (CheckAndBlockRequest) returns (CheckAndBlockResponse);
+  rpc ReleaseBlock (ReleaseBlockRequest) returns (ReleaseBlockResponse);
+}
+
+message CheckAndBlockRequest {
+  string vehiculoId = 1;
+  string reservaId  = 2;
+  string desdeIso   = 3;
+  string hastaIso   = 4;
+}
+
+message CheckAndBlockResponse {
+  bool ok = 1;
+  string reason = 2;
+  string bloqueId = 3;
+}
+
+message ReleaseBlockRequest {
+  string bloqueId = 1;
+}
+
+message ReleaseBlockResponse {
+  bool ok = 1;
+}

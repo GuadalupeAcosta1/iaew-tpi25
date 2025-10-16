@@ -1,0 +1,126 @@
+openapi: 3.1.0
+info:
+  title: Alquiler de Vehículos Urbanos API
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000/api
+tags:
+  - name: Vehiculos
+  - name: Reservas
+paths:
+  /vehiculos:
+    get:
+      tags: [Vehiculos]
+      summary: Listar vehículos
+      parameters:
+        - in: query
+          name: estado
+          schema: { type: string, enum: [disponible, mantenimiento, bloqueado] }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Vehiculo' }
+    post:
+      tags: [Vehiculos]
+      summary: Crear vehículo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/VehiculoCreate' }
+      responses:
+        '201':
+          description: Creado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Vehiculo' }
+  /reservas:
+    post:
+      tags: [Reservas]
+      summary: Crear reserva (pendiente de confirmación)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ReservaCreate' }
+      responses:
+        '201':
+          description: Creado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Reserva' }
+  /reservas/{id}/confirmar:
+    post:
+      tags: [Reservas]
+      summary: Confirmar reserva (inicia verificación diferida)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '202':
+          description: Aceptado (flujo asincrónico disparado)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  reservationId: { type: string, format: uuid }
+                  status: { type: string, enum: [verificacion_pendiente] }
+  /reservas/{id}:
+    get:
+      tags: [Reservas]
+      summary: Obtener reserva
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Reserva' }
+components:
+  schemas:
+    Vehiculo:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        patente: { type: string }
+        marca: { type: string }
+        modelo: { type: string }
+        anio: { type: integer }
+        estado: { type: string, enum: [disponible, mantenimiento, bloqueado] }
+    VehiculoCreate:
+      type: object
+      required: [patente, marca, modelo, anio]
+      properties:
+        patente: { type: string }
+        marca: { type: string }
+        modelo: { type: string }
+        anio: { type: integer }
+    Reserva:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        vehiculoId: { type: string, format: uuid }
+        clienteId: { type: string, format: uuid }
+        desde: { type: string, format: date-time }
+        hasta: { type: string, format: date-time }
+        estado: { type: string, enum: [pendiente, verificacion_pendiente, confirmada, rechazada, cancelada] }
+        contratoUrl: { type: string, nullable: true }
+    ReservaCreate:
+      type: object
+      required: [vehiculoId, clienteId, desde, hasta]
+      properties:
+        vehiculoId: { type: string, format: uuid }
+        clienteId: { type: string, format: uuid }
+        desde: { type: string, format: date-time }
+        hasta: { type: string, format: date-time }
