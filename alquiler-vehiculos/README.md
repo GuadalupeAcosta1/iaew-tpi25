@@ -96,7 +96,7 @@ Versión simple (sin Grafana). Revisar:
 
 ## Tag y commit de la entrega
 - Tag: `v1.0.0`
-- Commit hash: `57e3da7`
+- Commit hash: `a7afba3`
 
 ---
 
