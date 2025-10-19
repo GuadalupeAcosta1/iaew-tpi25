@@ -8,12 +8,39 @@
 **Integración**: gRPC a “Inventario” externo (stub local)
 
 ## Arquitectura en 1 vistazo
-Ver imágenes C4 en `/docs` (placeholders).  
 - API REST (Node.js + Express).
 - DB PostgreSQL.
 - Broker RabbitMQ.
 - Integración gRPC (stub).
 
+## 🧠 Documentación de Arquitectura
+
+Toda la documentación de diseño se encuentra en la carpeta [`/docs`](docs/).
+
+### 🧩 Diagramas C4
+Los diagramas se encuentran en [`/docs/c4`](docs/c4):
+
+| Nivel | Descripción | Imagen |
+|:------|:-------------|:--------|
+| Context | Ecosistema del sistema | [Ver diagrama](docs/c4/01-context.md) |
+| Container | Contenedores lógicos | [Ver diagrama](docs/c4/02-container.md) |
+| Component | Componentes internos de la API | [Ver diagrama](docs/c4/03-component.md) |
+
+> Las imágenes están en `docs/c4/img/` (context.jpeg, container.jpeg, component.jpeg).
+
+---
+
+### 🧩 ADRs — Architectural Decision Records
+Las decisiones arquitectónicas se encuentran en [`/docs/adr`](docs/adr):
+
+| ID | Tema | Archivo |
+|----|------|----------|
+| ADR-0001 | Estilo de API (REST vs gRPC) | [Ver ADR](docs/adr/0001-api-style-rest-vs-grpc.md) |
+| ADR-0002 | Broker de Mensajería (RabbitMQ vs Kafka) | [Ver ADR](docs/adr/0002-broker-rabbitmq-vs-kafka.md) |
+| ADR-0003 | Base de Datos (Postgres vs NoSQL) | [Ver ADR](docs/adr/0003-db-postgres-vs-nosql.md) |
+| ADR-0004 | Seguridad (OAuth2 + JWT) | [Ver ADR](docs/adr/0004-seguridad-oauth2-jwt.md) |
+
+---
 ## Requisitos previos
 - Docker ≥ 24.x y Docker Compose V2
 - RAM sugerida: 4 GB libres
