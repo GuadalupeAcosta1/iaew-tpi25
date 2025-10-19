@@ -69,7 +69,7 @@ Versión simple (sin Grafana). Revisar:
 
 ## Tag y commit de la entrega
 - Tag: `v1.0.0`
-- Commit hash: agregar manualmente al subir el repo.
+- Commit hash: `57e3da7`
 
 ---
 
