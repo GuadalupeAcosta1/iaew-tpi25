@@ -13,11 +13,11 @@
 - Broker RabbitMQ.
 - Integración gRPC (stub).
 
-## 🧠 Documentación de Arquitectura
+##  Documentación de Arquitectura
 
 Toda la documentación de diseño se encuentra en la carpeta [`/docs`](docs/).
 
-### 🧩 Diagramas C4
+### Diagramas C4
 Los diagramas se encuentran en [`/docs/c4`](docs/c4):
 
 | Nivel | Descripción | Imagen |
@@ -30,7 +30,7 @@ Los diagramas se encuentran en [`/docs/c4`](docs/c4):
 
 ---
 
-### 🧩 ADRs — Architectural Decision Records
+### ADRs — Architectural Decision Records
 Las decisiones arquitectónicas se encuentran en [`/docs/adr`](docs/adr):
 
 | ID | Tema | Archivo |
@@ -99,17 +99,3 @@ Versión simple (sin Grafana). Revisar:
 - Commit hash: `a7afba3`
 
 ---
-
-## Checklist obligatorio
-- [x] Proyecto y dominio elegido
-- [x] Arquitectura en 1 vistazo
-- [x] Requisitos previos
-- [x] Variables de entorno (.env.example)
-- [x] Cómo levantar local
-- [x] Usuarios/credenciales de prueba
-- [x] Cómo ejecutar pruebas (Postman mínimo)
-- [x] Cómo observar (logs/metrics simples)
-- [x] Flujo asincrónico (hook)
-- [x] Integración (proto gRPC)
-- [x] Limitaciones y mejoras futuras
-- [x] Tag y commit
