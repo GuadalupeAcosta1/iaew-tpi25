@@ -11,10 +11,8 @@ app.use(morgan('combined'));
 
 const PORT = process.env.API_PORT || 3000;
 
-// --- Simple health ---
 app.get('/health', (req,res)=> res.json({status:'ok', service:'alquiler-api'}));
 
-// --- Placeholder routes ---
 app.get('/api/vehiculos', (req,res)=> {
   res.json([
     {id:'00000000-0000-0000-0000-000000000001', patente:'AB123CD', marca:'Toyota', modelo:'Yaris', anio:2022, estado:'disponible'}
@@ -32,13 +30,8 @@ app.post('/api/reservas', (req,res)=> {
 
 app.post('/api/reservas/:id/confirmar', async (req,res)=> {
   const { id } = req.params;
-  // Hook asincrónico (a futuro: publicar en RabbitMQ)
   res.status(202).json({ reservationId:id, status:'verificacion_pendiente' });
 });
 
-// --- Minimal metrics (placeholder) ---
-app.get('/metrics', (req,res)=> {
-  res.type('text/plain').send('api_up 1\n');
-});
 
 app.listen(PORT, ()=> console.log(`API listening on :${PORT}`));

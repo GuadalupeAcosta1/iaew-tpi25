@@ -2,7 +2,7 @@
 
 
 ## Contexto
-El sistema debe permitir interacción desde clientes web y móviles para alquilar y confirmar reservas.
+El sistema debe permitir interacción desde clientes web para alquilar y confirmar reservas.
 
 
 ## Decisión
