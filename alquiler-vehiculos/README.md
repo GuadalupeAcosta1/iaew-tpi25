@@ -78,8 +78,6 @@ Incluye colección Postman mínima (`api/postman/Alquiler.postman_collection.jso
 ## Cómo observar
 Versión simple (sin Grafana). Revisar:
 - Logs en consola del contenedor `api`
-- Endpoint `/metrics` (placeholder simple) y logs JSON
-
 
 ## Flujo asincrónico
 - Endpoint `POST /reservas/{id}/confirmar` devuelve `202 Accepted` y encola un mensaje simulado.
