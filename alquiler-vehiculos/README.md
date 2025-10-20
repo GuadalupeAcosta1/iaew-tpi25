@@ -75,8 +75,6 @@ Incluye colección Postman mínima (`api/postman/Alquiler.postman_collection.jso
 - Importar la colección
 - Ejecutar petición **GET /health**
 
-Carga: colección `api/postman/carga.postman_collection.json` (placeholder).
-
 
 ## Flujo asincrónico
 - Endpoint `POST /reservas/{id}/confirmar` devuelve `202 Accepted` y encola un mensaje simulado.
