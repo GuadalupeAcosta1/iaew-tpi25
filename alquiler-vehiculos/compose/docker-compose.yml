@@ -1,4 +1,5 @@
 services:
+  # 1. API PRINCIPAL
   api:
     build:
       context: ../api
@@ -8,12 +9,12 @@ services:
     ports:
       - "${API_PORT:-3000}:3000"
     depends_on:
-      db:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
+      - db
+      - rabbitmq
+      - keycloak
     command: ["node", "src/app.js"]
 
+  # 2. BASE DE DATOS
   db:
     image: postgres:15
     container_name: alquiler_db
@@ -34,6 +35,7 @@ services:
       timeout: 5s
       retries: 5
 
+  # 3. BROKER DE MENSAJERÍA
   rabbitmq:
     image: rabbitmq:3-management
     container_name: alquiler_rabbit
@@ -51,5 +53,68 @@ services:
       timeout: 10s
       retries: 5
 
+  # 4. IDENTITY PROVIDER (SEGURIDAD)
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0
+    container_name: alquiler_keycloak
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    command: start-dev
+    ports:
+      - "8080:8080"
+    volumes:
+      - alquiler_keycloak_data:/opt/keycloak/data/h2
+
+  # 5. INVENTARIO EXTERNO (gRPC MOCK)
+  inventory:
+    build:
+      context: ../inventory
+    container_name: alquiler_inventory
+    ports:
+      - "50051:50051"
+
+  # 6. WORKER (CONSUMIDOR)
+  worker:
+    build:
+      context: ../worker
+    container_name: alquiler_worker
+    depends_on:
+      - rabbitmq
+      - db
+      - inventory
+    environment:
+      - RABBIT_HOST=rabbitmq
+      - GRPC_HOST=inventory:50051
+      - POSTGRES_HOST=db
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    networks:
+      - default
+
+  # 7. PROMETHEUS (METRICAS)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: alquiler_prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    depends_on:
+      - api
+
+  # 8. GRAFANA (DASHBOARD)
+  grafana:
+    image: grafana/grafana:latest
+    container_name: alquiler_grafana
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    depends_on:
+      - prometheus
+
 volumes:
   alquiler_pg_data:
+  alquiler_keycloak_data:
