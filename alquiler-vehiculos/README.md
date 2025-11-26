@@ -1,18 +1,22 @@
-# Alquiler de Vehículos Urbanos — Etapa 1 (Diseño & Arquitectura)
+# Alquiler de Vehículos Urbanos — Etapa 2 (Final)
 
-**Entrega**: v1.0.0 — _26-Oct-2025_  
+**Entrega**: v1.0.0 — _26-Nov-2025_  
 **Dominio**: Alquiler de Vehículos Urbanos  
-**Entidades**: Vehículo, Reserva  
-**Transacción**: Confirmar reserva (solapamientos, bloqueo, contrato)  
-**Asincronía**: Verificación diferida (licencia/crédito simulado) y notificación  
-**Integración**: gRPC a “Inventario” externo (stub local)
+**Curso**: Integración de Aplicaciones en Entorno Web (IAEW)
+
+Este proyecto implementa una arquitectura de backend distribuida y contenerizada para la gestión de alquileres, integrando seguridad avanzada, comunicación asincrónica, integración con sistemas legacy y observabilidad completa.
 
 ## Arquitectura en 1 vistazo
 
-- API REST (Node.js + Express).
-- DB PostgreSQL.
-- Broker RabbitMQ.
-- Integración gRPC (stub).
+El sistema ha evolucionado de una API monolítica a una arquitectura de microservicios coordinada:
+
+- **API REST (Node.js):** Gateway principal protegido con OAuth2.
+- **Identity Provider (Keycloak):** Servidor de autenticación y autorización (JWT).
+- **Broker (RabbitMQ):** Bus de mensajes para desacoplar procesos pesados.
+- **Worker (Node.js):** Microservicio consumidor que procesa reservas en background.
+- **Inventario (gRPC):** Mock de sistema externo para validación de stock.
+- **Base de Datos (PostgreSQL):** Persistencia relacional.
+- **Observabilidad:** Stack Prometheus + Grafana.
 
 ## Documentación de Arquitectura
 
@@ -47,71 +51,122 @@ Las decisiones arquitectónicas se encuentran en [`/docs/adr`](docs/adr):
 
 ## Requisitos previos
 
-- Docker ≥ 24.x y Docker Compose V2
-- RAM sugerida: 4 GB libres
-- Puertos: 3000 (API), 5432 (Postgres), 5672/15672 (RabbitMQ)
+- Docker ≥ 24.x y Docker Compose V2.
+- **RAM sugerida:** 4 GB libres (Keycloak y Grafana consumen recursos).
+- **Puertos Libres:** 3000 (API), 3001 (Grafana), 5433 (DB), 8080 (Keycloak), 9090 (Prometheus), 15672 (RabbitMQ), 50051 (gRPC).
 
 ## Variables de entorno
 
-Copiar `compose/.env.example` a `compose/.env` y ajustar:
-
-- `POSTGRES_PASSWORD`, `POSTGRES_DB`, `POSTGRES_USER`
-- `JWT_SECRET` (placeholder)
-- `RABBITMQ_DEFAULT_USER`, `RABBITMQ_DEFAULT_PASS`
+Copiar `compose/.env.example` a `compose/.env`. No es necesario editar nada para pruebas locales, los valores por defecto funcionan.
 
 ## Cómo levantar local
+
+Ubicarse en la carpeta de composición y ejecutar el script de arranque limpio:
 
 ```bash
 cd compose
 cp .env.example .env
+# IMPORTANTE: Reinicio limpio para asegurar configuraciones de Keycloak y DB
+docker compose down -v
 docker compose up -d --build
-# Esperar 10-15s y probar health:
-curl -s http://localhost:3000/health
 ```
 
-Servicios esperados:
+> **Nota:** Esperar aprox. **60 segundos** hasta que Keycloak finalice su configuración inicial. Puedes verificar con `docker compose ps` que todos los servicios estén en estado `Up` (y `healthy`).
 
-- API: http://localhost:3000
-- Postgres: localhost:5432
-- RabbitMQ Mgmt: http://localhost:15672 (user/pass del .env)
+## 🔐 Seguridad y Credenciales
 
-## Usuarios/credenciales de prueba
+El sistema utiliza **Keycloak** como Servidor de Autorización. Los endpoints de escritura (`POST`) están protegidos.
 
-- RabbitMQ: ver `.env`
-- API: demo sin OAuth2 (token JWT simulado en headers).
+| Servicio           | URL Local                      | Usuario | Contraseña |
+| :----------------- | :----------------------------- | :------ | :--------- |
+| **Keycloak Admin** | http://localhost:8080          | `admin` | `admin`    |
+| **Grafana**        | http://localhost:3001          | `admin` | `admin`    |
+| **Swagger UI**     | http://localhost:3000/api-docs | -       | -          |
 
-## Cómo ejecutar pruebas
+### Obtener Token de Acceso (Para Pruebas)
 
-Incluye colección Postman mínima (`api/postman/Alquiler.postman_collection.json`).
+El sistema ya cuenta con un usuario de prueba pre-configurado (`testuser`). Ejecuta este comando en tu terminal para obtener su token:
 
-- Importar la colección
-- Ejecutar petición **GET /health**
+```bash
+curl -X POST http://localhost:8080/realms/alquiler-realm/protocol/openid-connect/token \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "client_id=api-alquiler" \
+  -d "username=testuser" \
+  -d "password=1234" \
+  -d "grant_type=password"
+```
 
-## Cómo observar
+## 🧪 Cómo ejecutar pruebas
 
-Versión simple (sin Grafana). Revisar:
+### 1. API & Seguridad (Swagger UI)
 
-- Logs en consola del contenedor `api`
-- Endpoint `/metrics` (placeholder simple) y logs JSON
+1. Ingresa a [**http://localhost:3000/api-docs**](http://localhost:3000/api-docs).
+2. Haz clic en el botón **Authorize** (candado, arriba a la derecha).
+3. Pega el token obtenido en el paso anterior (Value: `eyJhb...`).
+4. Ejecuta el endpoint `POST /reservas` para crear una reserva.
+   - **Response:** `201 Created`.
+   - **Acción:** Copia el `id` de la reserva que devuelve la respuesta.
 
-## Flujo asincrónico
+### 2. Flujo Asincrónico (Confirmación)
 
-- Endpoint `POST /reservas/{id}/confirmar` devuelve `202 Accepted` y encola un mensaje simulado.
-- Consumer **NO incluido** en esta versión simple (se deja hook en código para futuro).
-
-## Integración
-
-- Proto gRPC en `api/proto/inventario.proto` (stub). No se levanta server externo en esta etapa.
-
-## Limitaciones y mejoras futuras
-
-- Falta OAuth2 completo (se deja middleware placeholder).
-- Falta consumer/verificación real y notificaciones reales.
-- Falta dashboard p95/throughput/error-rate (futuro: OTEL + Grafana).
-
-## Tag y commit de la entrega
-
-- Tag: `v1.0.0`
-- Commit hash: `bf231e3`
+1. En Swagger, busca el endpoint `POST /reservas/{id}/confirmar`.
+2. Pega el ID de la reserva en el campo `id`.
+3. Ejecuta la petición.
+   - **Response:** `202 Accepted` (La API responde inmediatamente, delegando el procesamiento al Worker).
 
 ---
+
+## 🔄 Verificación de Integración (Logs)
+
+Para verificar que el sistema funciona integradamente (API -> RabbitMQ -> Worker -> gRPC -> DB), revisa los logs de los contenedores:
+
+1. Abre una terminal en la carpeta del proyecto.
+2. Ejecuta:
+
+   ```bash
+   docker compose logs -f worker inventory
+   ```
+
+3. Secuencia esperada en los logs:
+
+- `[Worker]` Recibido mensaje para confirmar reserva...
+- `[Worker]` Consultando stock vía gRPC...
+- `[Inventory]` (gRPC) Verificando disponibilidad...
+- `[Worker]` Stock confirmado. Actualizando DB...
+- `[Worker]` ✅ Reserva finalizada con éxito.
+
+---
+
+## 📊 Cómo observar (Grafana)
+
+El sistema incluye monitoreo en tiempo real.
+
+1. Ingresa a [**http://localhost:3001**](http://localhost:3001).
+2. **Login:** `admin` / `admin` (puedes saltar el cambio de contraseña).
+3. Configura el origen de datos (si no está configurado):
+   - Ve a **Connections > Data Sources**.
+   - Click en **Add new data source** -> Selecciona **Prometheus**.
+   - URL: `http://prometheus:9090`
+   - Click en **Save & Test**.
+4. Visualiza métricas:
+   - Ve a **Dashboards** -> Create Dashboard.
+   - Selecciona una métrica, por ejemplo: `rate(http_request_duration_seconds_count[1m])`.
+   - Genera tráfico en la API y observa cómo cambian los gráficos.
+
+---
+
+## ⚙️ Tecnologías e Integraciones
+
+- **API Gateway:** Node.js + Express (Puerto 3000).
+- **Seguridad:** OAuth2 / OpenID Connect con Keycloak (Puerto 8080).
+- **Mensajería:** RabbitMQ para desacoplar la confirmación de reservas (Puertos 5672/15672).
+- **Integración Legacy:** Comunicación gRPC con servicio simulado de Inventario (Puerto 50051).
+- **Base de Datos:** PostgreSQL (Puerto 5433).
+- **Observabilidad:** Prometheus + Grafana (Puerto 3001) + Logs JSON (Pino).
+
+---
+
+## 🏷️ Tag y commit de la entrega
+
+- **Tag:** `v1.0.0`
+- **Commit Hash:** `(Pega aquí tu último hash de git)`
