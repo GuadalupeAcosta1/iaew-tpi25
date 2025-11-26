@@ -1,11 +1,29 @@
 # C4 - Nivel 3: Componentes de la API
 
+classDiagram
+class VehiclesController {
++getVehicles()
++createVehicle()
+}
+class ReservationsController {
++createReservation()
++confirmReservation()
+}
+class ReservationService {
++validateOverlap()
++save()
+}
+class VehicleRepository {
++findAll()
++findById()
+}
 
-![Component](img/component.jpeg)
-
+    VehiclesController --> VehicleRepository
+    ReservationsController --> ReservationService
+    ReservationService --> VehicleRepository
+    ReservationService --> BrokerClient
 
 Componentes internos principales de la API:
-
 
 - **VehiclesController:** expone endpoints relacionados con vehículos (`GET /vehicles`).
 - **ReservationsController:** permite crear y confirmar reservas (`POST /reservations`, `POST /reservations/{id}/confirm`).
