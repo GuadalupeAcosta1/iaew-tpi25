@@ -1,22 +1,29 @@
 # C4 - Nivel 1: Contexto del Sistema
 
-c4Context
-title Diagrama de Contexto - Sistema de Alquiler de Vehículos
+```mermaid
+graph TD
+    %% Estilos
+    classDef person fill:#08427b,stroke:#052e56,color:white;
+    classDef internal fill:#1168bd,stroke:#0b4884,color:white;
+    classDef external fill:#999999,stroke:#666666,color:white;
 
-    Person(customer, "Cliente", "Utiliza la app para reservar vehículos.")
+    %% Nodos
+    User((Cliente)):::person
 
-    System_Boundary(system, "Sistema de Alquiler") {
-        System(api, "API de Alquiler", "Gestiona reservas, vehículos y usuarios.")
-    }
+    subgraph System [Sistema de Alquiler]
+        API[API de Alquiler]:::internal
+    end
 
-    System_Ext(mail, "Sistema de Correo", "Envía notificaciones.")
-    System_Ext(inventory, "Inventario Externo", "Valida disponibilidad física (gRPC).")
-    System_Ext(auth, "Keycloak (IdP)", "Autenticación y Tokens.")
+    Mail[Sistema de Correo]:::external
+    Inv[Inventario Externo gRPC]:::external
+    KC[Keycloak IdP]:::external
 
-    Rel(customer, api, "Usa", "HTTPS")
-    Rel(api, mail, "Envía emails", "SMTP")
-    Rel(api, inventory, "Consulta", "gRPC")
-    Rel(api, auth, "Valida token", "HTTPS")
+    %% Relaciones
+    User -- Usa (HTTPS) --> API
+    API -- Envía (SMTP) --> Mail
+    API -- Consulta (gRPC) --> Inv
+    API -- Valida Token (HTTPS) --> KC
+```
 
 El sistema de **Alquiler de Vehículos Urbanos** permite a los usuarios alquilar autos, bicicletas y scooters de manera ágil desde una app web o móvil.
 

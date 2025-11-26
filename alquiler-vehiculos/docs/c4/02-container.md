@@ -1,22 +1,30 @@
 # C4 - Nivel 2: Contenedores
 
-c4Container
-title Diagrama de Contenedores
+```mermaid
+graph TD
+    %% Estilos
+    classDef person fill:#08427b,stroke:#052e56,color:white;
+    classDef container fill:#438dd5,stroke:#333,color:white;
+    classDef db fill:#2f95c7,stroke:#333,color:white;
 
-    Person(user, "Cliente", "Web/Mobile App")
+    %% Actores
+    User((Cliente Web/App)):::person
 
-    System_Boundary(box, "Alquiler de Vehículos") {
-        Container(api, "API REST", "Node.js/Express", "Maneja lógica de negocio y endpoints.")
-        Container(db, "Base de Datos", "PostgreSQL", "Almacena vehículos y reservas.")
-        Container(broker, "Broker", "RabbitMQ", "Cola de mensajes para asincronía.")
-        Container(worker, "Worker", "Node.js", "Procesa verificaciones en segundo plano.")
-    }
+    %% Sistema
+    subgraph Box [Contenedores Alquiler]
+        API[API REST<br/>Node.js + Express]:::container
+        Broker[[Broker<br/>RabbitMQ]]:::container
+        Worker[Worker<br/>Node.js]:::container
+        DB[(Base de Datos<br/>PostgreSQL)]:::db
+    end
 
-    Rel(user, api, "Llama a", "JSON/HTTPS")
-    Rel(api, db, "Lee/Escribe", "SQL/TCP")
-    Rel(api, broker, "Publica eventos", "AMQP")
-    Rel(broker, worker, "Consume eventos", "AMQP")
-    Rel(worker, db, "Actualiza estado", "SQL/TCP")
+    %% Relaciones
+    User -- 1. HTTPS/JSON --> API
+    API -- 2. Lee/Escribe --> DB
+    API -- 3. Publica Evento --> Broker
+    Broker -- 4. Consume Evento --> Worker
+    Worker -- 5. Actualiza Estado --> DB
+```
 
 **Contenedores del sistema:**
 
@@ -32,3 +40,7 @@ title Diagrama de Contenedores
 2. La API valida y persiste la reserva en la DB.
 3. Se encola un mensaje en RabbitMQ para procesar la verificación.
 4. El Worker (placeholder) consume el mensaje y simula la notificación.
+
+```
+
+```
